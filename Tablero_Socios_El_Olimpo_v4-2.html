@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M&A El Olimpo — Tablero de Hitos para Socios</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#F0F4F8;color:#1A1A2E;min-height:100vh;padding:0}
+.page{max-width:920px;margin:0 auto;padding:1.5rem 1rem 3rem}
+
+.hdr{margin-bottom:.75rem}
+.hdr h1{font-size:20px;font-weight:600;color:#0D1F2D;margin-bottom:3px}
+.hdr p{font-size:12px;color:#6B7280}
+.top-row{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
+.global-prog{flex:1;min-width:200px}
+.gp-label{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#6B7280;margin-bottom:5px}
+.gp-label strong{font-size:14px;font-weight:600;color:#1A1A2E}
+.prog-track{height:9px;background:#E5E7EB;border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;border-radius:99px;transition:width .5s}
+.next-up{background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:9px 14px;font-size:11px;color:#6B7280;max-width:290px;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.next-up strong{color:#1A1A2E;display:block;margin-bottom:2px;font-size:12px;font-weight:600}
+
+.notice{background:#FFFBEB;border:1px solid #FDE68A;border-left:3px solid #F59E0B;border-radius:8px;padding:8px 13px;margin-bottom:1rem;font-size:11px;color:#92400E;line-height:1.55}
+.notice strong{color:#78350F}
+
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:1.25rem;padding-bottom:.8rem;border-bottom:1px solid #E5E7EB}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:#6B7280;font-weight:500}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+.phase{margin-bottom:1.5rem;background:#fff;border:1px solid #E5E7EB;border-radius:14px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.phase-hdr{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none;background:#fff}
+.phase-hdr:hover{background:#FAFAFA}
+.badge{font-size:9px;font-weight:700;padding:3px 9px;border-radius:99px;color:#fff;flex-shrink:0;letter-spacing:.3px}
+.ph-title{font-size:13px;font-weight:600;color:#1A1A2E;flex:1}
+.ph-sub{font-size:10px;font-weight:400;color:#9CA3AF}
+.ph-pct{font-size:14px;font-weight:700;min-width:40px;text-align:right}
+.toggle-btn{background:#F3F4F6;border:none;border-radius:7px;width:28px;height:24px;cursor:pointer;font-size:11px;color:#6B7280;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
+.toggle-btn:hover{background:#E5E7EB}
+
+.phase-bar-wrap{padding:0 16px 10px;background:#fff}
+.phase-bar-track{height:5px;background:#E5E7EB;border-radius:99px;overflow:hidden}
+.phase-bar-fill{height:100%;border-radius:99px}
+
+.cards-section{padding:0 16px 16px;background:#fff}
+.cards-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin;scrollbar-color:#D1D5DB transparent}
+.cards-row::-webkit-scrollbar{height:4px}
+.cards-row::-webkit-scrollbar-track{background:transparent}
+.cards-row::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:99px}
+
+.card{background:#fff;border:1.5px solid #E5E7EB;border-radius:12px;padding:12px 12px 10px;min-width:142px;max-width:158px;flex-shrink:0;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.card:hover{border-color:#9CA3AF;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.card.money{border-left:3px solid #1D9E75}
+.card.active-det{border-color:#185FA5;box-shadow:0 0 0 3px rgba(24,95,165,.12)}
+
+.icon-ring{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:8px;border:2px solid transparent;flex-shrink:0}
+.ir-green{background:#E1F5EE;border-color:#1D9E75}
+.ir-amber{background:#FEF3C7;border-color:#BA7517}
+.ir-red{background:#FEE2E2;border-color:#A32D2D}
+.ir-pend{background:#F3F4F6;border-color:#D1D5DB}
+.ir-money{background:#DCFCE7;border-color:#1D9E75}
+
+.card-name{font-size:10px;font-weight:600;color:#1A1A2E;line-height:1.35;margin-bottom:3px}
+.card-dates{font-size:9px;color:#9CA3AF;margin-bottom:5px}
+.card-pct{font-size:16px;font-weight:700;margin-bottom:4px}
+.chip{display:inline-block;padding:2px 9px;border-radius:99px;font-size:9px;font-weight:600}
+.chip-green{background:#D1FAE5;color:#065F46}
+.chip-amber{background:#FEF3C7;color:#92400E}
+.chip-red{background:#FEE2E2;color:#991B1B}
+.chip-pend{background:#F3F4F6;color:#6B7280}
+.chip-money{background:#DCFCE7;color:#14532D;border:1px solid #86EFAC}
+.chip-done{background:#E0E7FF;color:#3730A3}
+
+.det{display:none;margin:0 16px 16px;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:.85rem 1rem;font-size:12px}
+.det.open{display:block}
+.det-title{font-weight:600;color:#1A1A2E;margin-bottom:6px;font-size:13px}
+.det-grid{display:flex;gap:1.25rem;flex-wrap:wrap;margin-bottom:5px}
+.det-item{color:#6B7280;font-size:11px}
+.det-item span{color:#1A1A2E;font-weight:600}
+.det-dep{font-size:10px;color:#6B7280;border-top:1px solid #E5E7EB;padding-top:5px;margin-top:4px;line-height:1.5}
+.det-est{font-size:9px;color:#B45309;background:#FFFBEB;padding:3px 8px;border-radius:6px;display:inline-block;margin-top:5px}
+.det-hard{font-size:9px;color:#991B1B;background:#FEE2E2;padding:3px 8px;border-radius:6px;display:inline-block;margin-top:5px;font-weight:600}
+
+.footer{text-align:center;font-size:10px;color:#9CA3AF;margin-top:2rem;padding-top:1rem;border-top:1px solid #E5E7EB}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="hdr">
+    <h1>M&A El Olimpo — Tablero de Hitos</h1>
+    <p>15 feb 2026 — 15 ago 2026 · Hoy: <span id="today"></span></p>
+  </div>
+
+  <div class="top-row">
+    <div class="global-prog">
+      <div class="gp-label"><span>Progreso global (fases 0–8)</span><strong id="gp-txt">—</strong></div>
+      <div class="prog-track"><div class="prog-fill" id="gp-fill" style="width:0%"></div></div>
+    </div>
+    <div class="next-up">
+      <strong>Próximos hitos críticos</strong>
+      Firma CV USD 1.5MM — <span style="color:#BA7517;font-weight:600">06 may 2026</span><br>
+      Firma CV Maestro — <span style="color:#BA7517;font-weight:600">13 may 2026</span><br>
+      <span style="font-size:9px;color:#991B1B;font-weight:600">⚠ Prepago Sabadell: límite 06 jun 2026</span>
+    </div>
+  </div>
+
+  <div class="notice">
+    <strong>⚠️ Fechas en revisión con las partes:</strong> El CV Maestro se firma <strong>una semana después</strong> del CV USD 1.5MM. El prepago a Sabadell tiene como <strong>fecha límite el 06-jun-2026</strong>. Las fechas marcadas como <span style="background:#FEE2E2;color:#991B1B;padding:1px 5px;border-radius:3px;font-weight:600">HARD DEADLINE</span> no son negociables.
+  </div>
+
+  <div class="legend">
+    <div class="li"><div class="dot" style="background:#3730A3"></div>Completado</div>
+    <div class="li"><div class="dot" style="background:#1D9E75"></div>En tiempo</div>
+    <div class="li"><div class="dot" style="background:#BA7517"></div>En riesgo</div>
+    <div class="li"><div class="dot" style="background:#A32D2D"></div>Retrasado</div>
+    <div class="li"><div class="dot" style="background:#D1D5DB"></div>Pendiente</div>
+    <div class="li"><div class="dot" style="background:#1D9E75"></div>💰 Flujo de dinero</div>
+  </div>
+
+  <div id="phases"></div>
+
+  <div class="footer">Toca cualquier hito para ver detalles y dependencias · M&A El Olimpo 2026 · v4 · 27-abr-2026</div>
+</div>
+
+<script>
+const today = new Date();
+const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+document.getElementById('today').textContent =
+  today.getDate() + ' ' + months[today.getMonth()] + ' ' + today.getFullYear();
+
+// SECUENCIA LÓGICA CORREGIDA:
+// 6.1 Draft CV 1.5MM:   08-abr → 06-may
+// 6.2 Firma CV 1.5MM:   06-may → 09-may
+// 6.3 Desembolso 1.5MM: 09-may → 10-may
+// 6.4 Draft CV Maestro: 16-abr → 01-may  (en paralelo)
+// 6.5 Firma CV Maestro: 13-may (1 semana después de firma 1.5MM = 06-may + 7 días)
+// 6.7 Cond. Precedentes: 13-may → 05-jun
+// 6.8 1er Desembolso Maestro: 05-jun → 06-jun
+// 7.3 Prepago Sabadell: 06-jun ← HARD DEADLINE
+
+const PHASES = [
+  {id:'f0', badge:'Fase 0', title:'Acuerdo entre Socios', sub:'✅ COMPLETADO', pct:100, bc:'#3730A3',
+   hitos:[
+    {e:'⚖️', n:'Contratar equipo legal', d:'06 mar → 20 mar', p:100, s:'done', st:'Completado', money:false,
+     det:{r:'Alfredo Flores / GK', i:'06-mar-2026', f:'20-mar-2026', dep:'Sin dependencia previa.', note:'Se contrató el despacho Hunterman de Campeche y se mandó anticipo.', hard:false, est:false}},
+    {e:'📝', n:'Draft convenio socios', d:'23 mar → 06 abr', p:100, s:'done', st:'Completado', money:false,
+     det:{r:'Notario', i:'23-mar-2026', f:'06-abr-2026', dep:'🔒 Dep: 0.1 concluido.', note:'Ya se tiene Draft del acuerdo de Mediación. Firma el 06-abr.', hard:false, est:false}},
+    {e:'✍️', n:'Firma y protocolización', d:'06 abr → 07 abr', p:100, s:'done', st:'Completado', money:false,
+     det:{r:'Notario', i:'06-abr-2026', f:'07-abr-2026', dep:'🔒 Dep: 0.2', note:'Se hace por firma electrónica.', hard:false, est:false}},
+    {e:'📦', n:'Entrega convenio a Oleomex', d:'16 abr', p:100, s:'done', st:'Completado', money:false,
+     det:{r:'Jp / Asesor', i:'16-abr-2026', f:'16-abr-2026', dep:'🔒 Dep: 0.3 — Desbloquea contratos maestros.', note:'Se entrega 48 hrs después de la firma. Hito crítico cumplido.', hard:false, est:false}},
+  ]},
+
+  {id:'f1', badge:'Fase 1', title:'Due Diligence Master', sub:'7 FRENTES EN PARALELO', pct:82, bc:'#1D9E75',
+   hitos:[
+    {e:'💹', n:'DD Finanzas', d:'15 feb → 07 mar', p:100, s:'done', st:'Completado', money:false,
+     det:{r:'Jorge Muro / Oleomex', i:'15-feb-2026', f:'07-mar-2026', dep:'Sin dependencia previa.', note:'Validación financiera de liquidez y viabilidad del proyecto.', hard:false, est:false}},
+    {e:'📊', n:'DD Fiscal', d:'15 feb → 01 abr', p:98, s:'green', st:'En tiempo', money:false,
+     det:{r:'Luis D. Rentería / Oleomex', i:'15-feb-2026', f:'01-abr-2026', dep:'Sin dependencia previa.', note:'Obligaciones, riesgos y estructura impositiva del deal. Incluye validación del modelo de asignación de precios.', hard:false, est:false}},
+    {e:'⚖️', n:'DD Jurídico', d:'15 feb → 17 abr', p:92, s:'green', st:'En tiempo', money:false,
+     det:{r:'Francisco Flores / Oleomex', i:'15-feb-2026', f:'17-abr-2026', dep:'Sin dependencia previa.', note:'Viabilidad jurídica de la compra de activos.', hard:false, est:false}},
+    {e:'📋', n:'DD Contable', d:'15 feb → 17 abr', p:97, s:'green', st:'En tiempo', money:false,
+     det:{r:'Jose L. Garibay / Oleomex', i:'15-feb-2026', f:'17-abr-2026', dep:'Sin dependencia previa.', note:'Integridad de cifras, activos y obligaciones del proyecto.', hard:false, est:false}},
+    {e:'🔍', n:'DD Legal (vendedores)', d:'15 feb → 30 abr', p:94, s:'green', st:'En tiempo', money:false,
+     det:{r:'Jp / Asesor', i:'15-feb-2026', f:'30-abr-2026', dep:'Sin dependencia previa.', note:'Validar documentación, facultades y riesgos jurídicos antes de la compra.', hard:false, est:false}},
+    {e:'🌿', n:'DD Predios y Plantaciones', d:'15 feb → 30 abr', p:94, s:'green', st:'En tiempo', money:false,
+     det:{r:'Hugo Rojas / COMSA', i:'15-feb-2026', f:'30-abr-2026', dep:'Sin dependencia previa.', note:'Verificación técnica y documental: legal, operativo y ambiental.', hard:false, est:false}},
+    {e:'🏭', n:'DD Molino', d:'15 feb → 24 abr', p:100, s:'done', st:'Completado', money:false,
+     det:{r:'Jp / COMSA', i:'15-feb-2026', f:'24-abr-2026', dep:'Sin dependencia previa.', note:'Evaluación técnica para asegurar funcionalidad y cumplimiento regulatorio.', hard:false, est:false}},
+  ]},
+
+  {id:'f6', badge:'Fase 6', title:'Contratos CV y Desembolsos', sub:'CV 1.5MM → +1 SEM → CV MAESTRO', pct:26, bc:'#185FA5',
+   hitos:[
+    {e:'📄', n:'Draft CV — USD 1.5 MM', d:'08 abr → 06 may', p:90, s:'amber', st:'En revisión', money:false,
+     det:{r:'Francisco Flores / Oleomex', i:'08-abr-2026', f:'06-may-2026', dep:'Sin dependencia previa.', note:'Contrato CV: Predios Santo Domingo II, Santo Domingo III y Tres Arbolitos.', hard:false, est:false}},
+    {e:'✍️', n:'Firma CV — USD 1.5 MM', d:'06 may → 09 may', p:0, s:'pend', st:'Pendiente', money:false,
+     det:{r:'Francisco Flores / Oleomex', i:'06-may-2026', f:'09-may-2026', dep:'🔒 Dep: 6.1 concluido.', note:'Formalizar convenio de primer cierre parcial. La firma del CV Maestro ocurre 1 semana después de esta fecha.', hard:false, est:false}},
+    {e:'💰', n:'💰 1er Desembolso — USD 1.5MM', d:'09 may → 10 may', p:0, s:'money', st:'USD 1.5 MM', money:true,
+     det:{r:'Jorge Muro / Oleomex', i:'09-may-2026', f:'10-may-2026', dep:'🔒 Dep: 6.2 firmado.', note:'Primer ingreso de efectivo al proyecto.', hard:false, est:false}},
+    {e:'📄', n:'Draft CV Maestro', d:'16 abr → 01 may', p:80, s:'green', st:'En tiempo', money:false,
+     det:{r:'Francisco Flores / Oleomex', i:'16-abr-2026', f:'01-may-2026', dep:'🔒 Dep: acuerdo entre socios + 15 días. Se elabora en paralelo al CV 1.5MM.', note:'Contrato maestro que cubre la totalidad de los activos de las 4 entidades.', hard:false, est:false}},
+    {e:'✍️', n:'Firma CV Maestro', d:'13 may → 16 may', p:0, s:'pend', st:'Pendiente', money:false,
+     det:{r:'Francisco Flores / Oleomex', i:'13-may-2026', f:'16-may-2026', dep:'🔒 Dep: firma CV 1.5MM (06-may) + 7 días = 13-may. Secuencia acordada entre las partes.', note:'Se firma exactamente 1 semana después del CV USD 1.5MM.', hard:false, est:false}},
+    {e:'📋', n:'Condiciones precedentes', d:'13 may → 05 jun', p:0, s:'pend', st:'Pendiente', money:false,
+     det:{r:'Luis Octavio Vallejo', i:'13-may-2026', f:'05-jun-2026', dep:'🔒 Dep: firma CV Maestro (13-may).', note:'~23 días para cumplir todas las condiciones precedentes. Plazo ajustado al deadline Sabadell.', hard:false, est:false}},
+    {e:'🏛️', n:'Fideicomisos constituidos', d:'04 jun → 09 jun', p:20, s:'green', st:'En tiempo', money:false,
+     det:{r:'Luis Octavio Vallejo', i:'04-jun-2026', f:'09-jun-2026', dep:'🔒 Dep: firma contrato CV Maestro.', note:'Constitución de los fideicomisos requeridos como condición precedente.', hard:false, est:false}},
+    {e:'💰', n:'💰 1er Desembolso Maestro', d:'05 jun → 06 jun', p:0, s:'money', st:'→ Prepago Sabadell', money:true,
+     det:{r:'Jorge Muro / Oleomex', i:'05-jun-2026', f:'06-jun-2026', dep:'🔒 Dep: cumplir precedentes (6.7). El primer destino es el prepago total a Sabadell el mismo 06-jun.', note:'El desembolso y el prepago a Sabadell ocurren el mismo día: 06-jun-2026.', hard:true, est:false}},
+  ]},
+
+  {id:'f7', badge:'Fase 7', title:'Prepago Deuda Sabadell', sub:'⛔ LÍMITE: 06 JUN 2026', pct:40, bc:'#A32D2D',
+   hitos:[
+    {e:'📬', n:'Trámite prórroga mar-2026', d:'15 mar → 18 mar', p:100, s:'done', st:'Completado', money:false,
+     det:{r:'Alfredo Flores / COMSA', i:'15-mar-2026', f:'18-mar-2026', dep:'Sin dependencia previa.', note:'Alfredo la mandó para vo.bo. de Sabadell.', hard:false, est:false}},
+    {e:'🚫', n:'Autorización prórroga', d:'18 mar → 28 mar', p:100, s:'red', st:'Rechazada', money:false,
+     det:{r:'Sabadell', i:'18-mar-2026', f:'28-mar-2026', dep:'—', note:'Sabadell NO autorizó la prórroga. Crédito vencido (mar-2026 impago). Sin pago antes del 08-jun-2026, entra a cartera vencida y se inician gestiones de recuperación.', hard:false, est:false}},
+    {e:'💸', n:'💰 Prepago total a Sabadell', d:'⛔ máx 06 jun 2026', p:0, s:'money', st:'HARD DEADLINE', money:true,
+     det:{r:'Alfredo Flores / Oleomex', i:'06-jun-2026', f:'06-jun-2026', dep:'🔒 Dep: 1er desembolso CV Maestro (6.8) — mismo día 06-jun. Primer destino del flujo de Oleomex.', note:'FECHA LÍMITE NO NEGOCIABLE. Si no se paga el 06-jun, el crédito entra a cartera vencida el 08-jun y Sabadell inicia gestiones de recuperación.', hard:true, est:false}},
+    {e:'🔓', n:'Liberación garantías Sabadell', d:'08 jun → 28 jun', p:0, s:'pend', st:'Pendiente', money:false,
+     det:{r:'Sabadell', i:'08-jun-2026', f:'28-jun-2026', dep:'🔒 Dep: pago total recibido por Sabadell (06-jun).', note:'~20 días hábiles tras recibir el pago total.', hard:false, est:false}},
+    {e:'🏛️', n:'💰 Garantías al Fideicomiso', d:'28 jun → 08 jul', p:0, s:'money', st:'Cond. cierre', money:true,
+     det:{r:'Luis Octavio Vallejo', i:'28-jun-2026', f:'08-jul-2026', dep:'🔒 Dep: liberación Sabadell (7.4).', note:'Cesión Sabadell → FISO Bansi Oleomex. ~10 días.', hard:false, est:false}},
+  ]},
+
+  {id:'f4', badge:'Fase 4', title:'MIA y Permisos COMSA', sub:'2 URGENTES CON RETRASO', pct:37, bc:'#BA7517',
+   hitos:[
+    {e:'🌿', n:'EDA Diagnóstico Ambiental', d:'09 abr → 19 abr', p:100, s:'done', st:'Completado', money:false,
+     det:{r:'Alfredo Flores / COMSA', i:'09-abr-2026', f:'19-abr-2026', dep:'Sin dependencia previa.', note:'Se ingresó el 10-Mar a Municipio. Ya se pagó.', hard:false, est:false}},
+    {e:'🏗️', n:'Permiso uso de suelo 2026', d:'10 abr → 10 may', p:80, s:'amber', st:'URGENTE', money:false,
+     det:{r:'Alfredo Flores / COMSA', i:'10-abr-2026', f:'10-may-2026', dep:'URGENTE.', note:'Se ingresó el 10-Mar a SEMARNAT. Ya se tiene ficha de pago, falta liquidarlo.', hard:false, est:false}},
+    {e:'🚧', n:'Permiso de construcción', d:'10 abr → 10 may', p:50, s:'red', st:'RETRASO URGENTE', money:false,
+     det:{r:'Alfredo Flores / COMSA', i:'10-abr-2026', f:'10-may-2026', dep:'🔒 Dep: primero dar aviso (punto 4.9). NO se puede empezar la puesta en marcha sin este permiso.', note:'Bloqueante para el arranque del molino.', hard:false, est:false}},
+    {e:'📋', n:'Predial 2026', d:'06 mar → 07 mar', p:100, s:'done', st:'Completado', money:false,
+     det:{r:'Alfredo Flores / COMSA', i:'06-mar-2026', f:'07-mar-2026', dep:'Sin dependencia previa.', note:'Pagado.', hard:false, est:false}},
+    {e:'⚠️', n:'Subsanar obs. PPA / SEMABICCE', d:'06 mar → 05 may', p:0, s:'red', st:'PRIORIDAD 1', money:false,
+     det:{r:'Alfredo Flores / COMSA', i:'06-mar-2026', f:'05-may-2026', dep:'PRIORIDAD 1. Subsanar: Maquinaria, Baños portátiles, CONAGUA, Reforestación, Combustible, Obra, Limpieza.', note:'Retraso confirmado. Bloquea el permiso de construcción.', hard:false, est:false}},
+    {e:'📜', n:'Permiso condicionado operación', d:'31 jul → 15 ago (est.)', p:0, s:'pend', st:'Pendiente', money:false,
+     det:{r:'Alfredo Flores / COMSA', i:'31-jul-2026', f:'15-ago-2026', dep:'Dep: que opere el molino.', note:'Se tramita una vez operando el proyecto.', hard:false, est:true}},
+  ]},
+
+  {id:'f5', badge:'Fase 5', title:'MIA y Permisos Palma Real', sub:'VARIOS PUNTOS EN RETRASO', pct:30, bc:'#BA7517',
+   hitos:[
+    {e:'📋', n:'Prórroga permiso construcción', d:'10 mar → 09 abr', p:50, s:'red', st:'Retraso', money:false,
+     det:{r:'Alfredo Flores / Palma Real', i:'10-mar-2026', f:'09-abr-2026', dep:'PRIORIDAD 1. Pago a proveedores y biólogos.', note:'Permiso venció el 10-Mar-2025. En trámite con equipo Palma Real (Ing. Eder) y 2 biólogos especialistas.', hard:false, est:false}},
+    {e:'✅', n:'Permiso de operación', d:'15 feb → 16 feb', p:100, s:'done', st:'Completado', money:false,
+     det:{r:'Alfredo Flores / Palma Real', i:'15-feb-2026', f:'16-feb-2026', dep:'Sin dependencia previa.', note:'Autorizado. Expira 10-Mar-2045.', hard:false, est:false}},
+    {e:'🚪', n:'13 puertas metálicas', d:'01 abr → 30 jun', p:0, s:'red', st:'No iniciado', money:false,
+     det:{r:'Alfredo Flores / Palma Real', i:'01-abr-2026', f:'30-jun-2026', dep:'🔒 Dep: prórroga 5.1.', note:'Instalar 13 puertas metálicas y hacer estudio final de impacto ambiental en agua.', hard:false, est:false}},
+    {e:'🗺️', n:'Modificación polígono', d:'01 abr → 31 may', p:0, s:'red', st:'Retraso', money:false,
+     det:{r:'Alfredo Flores / Palma Real', i:'01-abr-2026', f:'31-may-2026', dep:'🔒 Dep: prórroga 5.1.', note:'Falta: desmantelar tanque diésel, manejo bidones, adecuaciones área taller, almacén agroquímicos.', hard:false, est:false}},
+    {e:'🌳', n:'Reforestación (62% avance)', d:'01 abr → 30 jul', p:62, s:'red', st:'Retraso', money:false,
+     det:{r:'Alfredo Flores / Palma Real', i:'01-abr-2026', f:'30-jul-2026', dep:'🔒 Dep: prórroga 5.1.', note:'Faltan 6.44 ha. Ya se tienen los árboles, falta plantarlos.', hard:false, est:false}},
+    {e:'💳', n:'Pago multa (pago 9/36)', d:'01 abr → 11 abr', p:25, s:'red', st:'Retraso', money:false,
+     det:{r:'Alfredo Flores / Palma Real', i:'01-abr-2026', f:'11-abr-2026', dep:'Flujo de efectivo disponible.', note:'Convenio a 36 pagos, al corriente. Vamos en el pago 9 de 36.', hard:false, est:false}},
+    {e:'🔄', n:'💰 Cesión derechos MIA a Oleomex', d:'15 jul → 14 ago', p:0, s:'money', st:'Cond. cierre', money:true,
+     det:{r:'Alfredo Flores / Palma Real', i:'15-jul-2026', f:'14-ago-2026', dep:'🔒 Dep: cumplir puntos 5.1 a 5.8. Regularizar MIA, pago multa, subsanar observaciones, solicitar cesión a SEMARNAT.', note:'Condición para el cierre definitivo con Oleomex.', hard:false, est:false}},
+  ]},
+
+  {id:'f3', badge:'Fase 3', title:'Arranque del Molino', sub:'CONDICIÓN PARA PAGO DEL 20% FINAL', pct:9, bc:'#BA7517',
+   hitos:[
+    {e:'⚡', n:'Sistema eléctrico', d:'11 may → 09 ago', p:10, s:'amber', st:'En revisión', money:false,
+     det:{r:'David López / RECAS', i:'11-may-2026', f:'09-ago-2026', dep:'Pago de anticipo requerido.', note:'Ya se tiene cotización. Incluye materiales, pruebas, comisionamiento. Supervisa RECAS.', hard:false, est:false}},
+    {e:'🔥', n:'Insulación de tuberías', d:'11 may → 15 jul', p:10, s:'amber', st:'En revisión', money:false,
+     det:{r:'David López / RECAS', i:'11-may-2026', f:'15-jul-2026', dep:'Pago de anticipo.', note:'Ya se tiene cotización. Incluye materiales y pruebas. Supervisa RECAS.', hard:false, est:false}},
+    {e:'🏗️', n:'Edificio — refuerzo estructural', d:'11 may → 19 ago', p:10, s:'amber', st:'En revisión', money:false,
+     det:{r:'David López / RECAS', i:'11-may-2026', f:'19-ago-2026', dep:'Pago de anticipo.', note:'En licitación. Refuerzos estructurales, pintura, borrador exterior. Supervisa RECAS.', hard:false, est:false}},
+    {e:'🔧', n:'Instalaciones mecánicas', d:'11 may → 10 jul', p:10, s:'amber', st:'En revisión', money:false,
+     det:{r:'David López / RECAS', i:'11-may-2026', f:'10-jul-2026', dep:'Pago de anticipo.', note:'Compras Oleomex, ejecuta obra RECAS.', hard:false, est:false}},
+    {e:'📦', n:'Materiales mecánicos', d:'11 may → 31 may', p:10, s:'amber', st:'En revisión', money:false,
+     det:{r:'David López / RECAS', i:'11-may-2026', f:'31-may-2026', dep:'Pago de anticipo.', note:'Compras Oleomex, ejecuta obra RECAS.', hard:false, est:false}},
+    {e:'👷', n:'PM y administración', d:'11 may → 26 may', p:10, s:'amber', st:'En revisión', money:false,
+     det:{r:'David López / RECAS', i:'11-may-2026', f:'26-may-2026', dep:'Pago de anticipo.', note:'Técnicos RECAS. Incluye costos de transporte.', hard:false, est:false}},
+    {e:'🏭', n:'💰 Prueba arranque molino', d:'30 jul → 29 ago', p:0, s:'money', st:'Libera 20% final', money:true,
+     det:{r:'David López / RECAS', i:'30-jul-2026', f:'29-ago-2026', dep:'🔒 Dep: todas las obras civiles y mecánicas completas.', note:'Criterio de éxito: meter fruta y sacar aceite. Libera el pago del 20% final.', hard:false, est:false}},
+  ]},
+
+  {id:'f8', badge:'Fase 8', title:'Fideicomiso', sub:'LUIS OCTAVIO VALLEJO — FIDUCIARIO', pct:12, bc:'#A32D2D',
+   hitos:[
+    {e:'📂', n:'Entrega expediente a fiduciario', d:'18 mar → 02 abr', p:85, s:'green', st:'En tiempo', money:false,
+     det:{r:'Jp / Asesor', i:'18-mar-2026', f:'02-abr-2026', dep:'Sin dependencia previa.', note:'15 días de elaboración.', hard:false, est:false}},
+    {e:'📝', n:'Draft FISO Oleomex', d:'16 abr → 31 may', p:0, s:'pend', st:'Pendiente', money:false,
+     det:{r:'Luis Octavio Vallejo', i:'16-abr-2026', f:'31-may-2026', dep:'🔒 Dep: acuerdo entre socios (0.4).', note:'45 días de elaboración.', hard:false, est:false}},
+    {e:'📝', n:'Draft FISO El Olimpo', d:'16 abr → 31 may', p:0, s:'pend', st:'Pendiente', money:false,
+     det:{r:'Luis Octavio Vallejo', i:'16-abr-2026', f:'31-may-2026', dep:'🔒 Dep: acuerdo entre socios (0.4).', note:'45 días. Fideicomiso específico del proyecto El Olimpo.', hard:false, est:false}},
+    {e:'✍️', n:'Firma FISO Oleomex', d:'01 jun → 04 jun', p:0, s:'pend', st:'Pendiente', money:false,
+     det:{r:'Luis Octavio Vallejo', i:'01-jun-2026', f:'04-jun-2026', dep:'🔒 Dep: 8.2. Debe estar listo antes del 1er desembolso Maestro (06-jun).', note:'3 días. Condición precedente del desembolso maestro.', hard:false, est:false}},
+    {e:'✍️', n:'Firma FISO El Olimpo', d:'01 jun → 04 jun', p:0, s:'pend', st:'Pendiente', money:false,
+     det:{r:'Luis Octavio Vallejo', i:'01-jun-2026', f:'04-jun-2026', dep:'🔒 Dep: 8.3. Debe estar listo antes del 1er desembolso Maestro (06-jun).', note:'3 días. Condición precedente del desembolso maestro.', hard:false, est:false}},
+    {e:'🔗', n:'💰 Cesión garantías Sabadell→FISO', d:'08 jul → 13 jul', p:0, s:'money', st:'Cierre operativo', money:true,
+     det:{r:'Luis Octavio Vallejo', i:'08-jul-2026', f:'13-jul-2026', dep:'🔒 Dep: liberación garantías Sabadell (7.4 — ~28-jun).', note:'5 días hábiles. Condición para el cierre definitivo del deal.', hard:false, est:false}},
+  ]},
+];
+
+function pctColor(p){return p>=70?'#1D9E75':p>=30?'#BA7517':'#A32D2D'}
+function irClass(s){
+  if(s==='done')  return 'ir-green';
+  if(s==='green') return 'ir-green';
+  if(s==='amber') return 'ir-amber';
+  if(s==='red')   return 'ir-red';
+  if(s==='money') return 'ir-money';
+  return 'ir-pend';
+}
+function chipClass(s){
+  if(s==='done')  return 'chip-done';
+  if(s==='green') return 'chip-green';
+  if(s==='amber') return 'chip-amber';
+  if(s==='red')   return 'chip-red';
+  if(s==='money') return 'chip-money';
+  return 'chip-pend';
+}
+function chipColor(s){
+  if(s==='done')  return '#3730A3';
+  if(s==='green') return '#065F46';
+  if(s==='amber') return '#92400E';
+  if(s==='red')   return '#991B1B';
+  if(s==='money') return '#14532D';
+  return '#6B7280';
+}
+
+let openDet = null;
+
+function render(){
+  const cont = document.getElementById('phases');
+  let totalPct = 0;
+
+  PHASES.forEach(ph => {
+    totalPct += ph.pct;
+    const pc = pctColor(ph.pct);
+    const div = document.createElement('div');
+    div.className = 'phase';
+    div.innerHTML = `
+      <div class="phase-hdr" onclick="toggle('${ph.id}')">
+        <span class="badge" style="background:${ph.bc}">${ph.badge}</span>
+        <span class="ph-title">${ph.title} <span class="ph-sub">— ${ph.sub}</span></span>
+        <span class="ph-pct" style="color:${pc}">${ph.pct}%</span>
+        <button class="toggle-btn" id="btn-${ph.id}">▼</button>
+      </div>
+      <div class="phase-bar-wrap" id="bar-${ph.id}">
+        <div class="phase-bar-track">
+          <div class="phase-bar-fill" style="width:${ph.pct}%;background:${pctColor(ph.pct)}"></div>
+        </div>
+      </div>
+      <div class="cards-section" id="section-${ph.id}">
+        <div class="cards-row" id="cards-${ph.id}">
+          ${ph.hitos.map((h,i) => `
+            <div class="card${h.money?' money':''}" id="card-${ph.id}-${i}" onclick="showDet('${ph.id}',${i})">
+              <div class="icon-ring ${irClass(h.s)}">${h.e}</div>
+              <div class="card-name">${h.n}</div>
+              <div class="card-dates">${h.d}</div>
+              <div class="card-pct" style="color:${chipColor(h.s)}">${h.p}%</div>
+              <span class="chip ${chipClass(h.s)}">${h.st}</span>
+            </div>`).join('')}
+        </div>
+        <div id="det-${ph.id}" class="det"></div>
+      </div>`;
+    cont.appendChild(div);
+  });
+
+  const avg = Math.round(totalPct / PHASES.length);
+  document.getElementById('gp-fill').style.width = avg + '%';
+  document.getElementById('gp-fill').style.background = pctColor(avg);
+  document.getElementById('gp-txt').textContent = avg + '%';
+}
+
+function showDet(phId, idx){
+  const key = phId + '-' + idx;
+  const panel = document.getElementById('det-' + phId);
+  const h = PHASES.find(p => p.id === phId).hitos[idx];
+
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active-det'));
+
+  if(openDet === key){
+    panel.classList.remove('open');
+    openDet = null;
+    return;
+  }
+  document.querySelectorAll('.det').forEach(d => d.classList.remove('open'));
+  openDet = key;
+
+  document.getElementById(`card-${phId}-${idx}`).classList.add('active-det');
+
+  panel.innerHTML = `
+    <div class="det-title">${h.e} ${h.n}</div>
+    <div class="det-grid">
+      <div class="det-item">Responsable: <span>${h.det.r}</span></div>
+      <div class="det-item">Inicio: <span>${h.det.i}</span></div>
+      <div class="det-item">Compromiso: <span>${h.det.f}</span></div>
+    </div>
+    <div class="det-dep">${h.det.dep}<br>${h.det.note}</div>
+    ${h.det.hard ? '<div class="det-hard">⛔ HARD DEADLINE — Fecha no negociable</div>' : ''}
+    ${h.det.est  ? '<div class="det-est">⚠️ Fecha estimada — en revisión con las partes</div>' : ''}`;
+  panel.classList.add('open');
+  panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function toggle(id){
+  const sec = document.getElementById('section-' + id);
+  const bar = document.getElementById('bar-' + id);
+  const btn = document.getElementById('btn-' + id);
+  const det = document.getElementById('det-' + id);
+  if(sec.style.display === 'none'){
+    sec.style.display = ''; bar.style.display = '';
+    btn.textContent = '▼';
+  } else {
+    sec.style.display = 'none'; bar.style.display = 'none';
+    det.classList.remove('open'); btn.textContent = '►';
+  }
+}
+
+render();
+</script>
+</body>
+</html>
